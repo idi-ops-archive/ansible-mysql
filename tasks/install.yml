@@ -1,0 +1,24 @@
+---
+
+- name: Install packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: mysql_server_packages
+
+- name: Configure MariaDB
+  template:
+    src: server.cnf.j2
+    dest: /etc/my.cnf.d/server.cnf
+    backup: yes
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - restart mysql server
+
+- name: Enable MariaDB
+  service:
+    name: mariadb
+    enabled: yes
+    state: started

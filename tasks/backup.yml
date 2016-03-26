@@ -1,0 +1,21 @@
+---
+
+- name: Create backup directory
+  file:
+    path: "{{ mysql_backup_path }}"
+    state: directory
+
+- name: Retrieve database list
+  command: /usr/bin/mysql --batch --skip-pager --skip-column-names --raw --execute 'show databases'
+  register: db_list
+
+- name: Backup each database indenpendently
+  shell: "/usr/bin/mysqldump {{ item }} > {{ mysql_backup_path }}/{{ item }}_{{ mysql_backup_timestamp }}.sql"
+  with_items: "{{ db_list.stdout_lines|difference(['information_schema','performance_schema']) }}"
+
+- name: Prune old backups
+  shell: "/usr/bin/find {{ mysql_backup_path }} -type f -name '*.gz' -mtime +{{ mysql_backup_days }} -delete"
+  register: delete_st
+
+- name: Compress all backups
+  shell: "/usr/bin/gzip {{ mysql_backup_path }}/*.sql"

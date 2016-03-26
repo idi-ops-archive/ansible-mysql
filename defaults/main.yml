@@ -1,0 +1,14 @@
+---
+
+#mysql_server_id
+
+mysql_server_packages:
+  - mariadb
+  - mariadb-server
+  - MySQL-python
+
+mysql_backup_path: /var/backups/mysql
+
+mysql_backup_timestamp: "{{ lookup('pipe', 'date +%Y%m%d-%H%M%S') }}"
+
+mysql_backup_days: 30
